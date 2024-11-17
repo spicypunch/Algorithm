@@ -3,49 +3,52 @@ import java.io.InputStreamReader
 
 fun main() {
     val br = BufferedReader(InputStreamReader(System.`in`))
-    val n = br.readLine().toInt()
-    val questions = mutableListOf<Pair<String, Pair<Int, Int>>>()
+    val count = br.readLine().toInt()
+    val list = mutableListOf<List<Int>>()
 
-    repeat(n) {
-        val (question, strike, ball) = br.readLine().split(" ")
-        questions.add(question to (strike.toInt() to ball.toInt()))
+    repeat(count) {
+        val line = br.readLine().split(" ").map { it.toInt() }
+        list.add(line)
     }
 
-    var count = 0
-    for (i in 123..987) {
-        val numStr = i.toString()
-        if (numStr.length != 3 || numStr.contains('0')) continue
-        if (numStr[0] == numStr[1] || numStr[0] == numStr[2] || numStr[1] == numStr[2]) continue
+    var answerCount= 0
 
-        var possible = true
-        for ((question, strikeBall) in questions){
-            val (strike, ball) = strikeBall
-            val calculatedStrikeBall = calculateStrikeBall(numStr, question)
-            if (calculatedStrikeBall != strikeBall) {
-                possible = false
-                break
+    for (i in 1..9) {
+        for (j in 1..9) {
+            for (k in 1..9) {
+                if (i == j || j == k || k == i) continue // 중복된 숫자 제외
+
+                val sampleNumber = "$i$j$k" // 후보 숫자 생성
+
+                var isPossible = true
+                for (arr in list) {
+                    val number = arr[0].toString()
+                    val strike = arr[1]
+                    val ball = arr[2]
+
+                    var calculatedStrike = 0
+                    var calculatedBall = 0
+
+                    for (i in sampleNumber.indices) {
+                        if (sampleNumber[i] == number[i]) {
+                            calculatedStrike++
+                        } else if (number.contains(sampleNumber[i])) {
+                            calculatedBall++
+                        }
+                    }
+
+                    if (strike != calculatedStrike || ball != calculatedBall) {
+                        isPossible = false
+                        break
+                    }
+                }
+
+                if (isPossible) {
+                    answerCount++
+                }
             }
         }
-
-        if (possible) {
-            count++
-        }
     }
 
-    println(count)
-}
-
-fun calculateStrikeBall(secret: String, guess: String): Pair<Int, Int> {
-    var strike = 0
-    var ball = 0
-
-    for (i in 0..2) {
-        if (secret[i] == guess[i]) {
-            strike++
-        } else if (secret.contains(guess[i])) {
-            ball++
-        }
-    }
-
-    return strike to ball
+    println(answerCount)
 }
